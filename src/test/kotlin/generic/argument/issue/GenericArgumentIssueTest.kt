@@ -32,13 +32,37 @@ class GenericArgumentIssueTest(
         result shouldBe 1
     }
 
-    should("make this argument") {
+    should("make a Pair argument") {
         val arg: Argument<Pair<String, Boolean>> = object: GenericArgument<Pair<String, Boolean>>() {}
     }
 
-    should("use GenericArgument properly for retrieveGenericSingle") {
+    should("use GenericArgument properly for retrieve().awaitSingle()") {
         val arg = object: GenericArgument<Pair<String, Boolean>>() {}
         val result: Pair<String, Boolean> = httpClient.retrieve(HttpRequest.GET<Any>("/httptest/somepair"), arg).awaitSingle()
+
+        result.first shouldBe "a"
+        result.second shouldBe true
+    }
+
+    should("make a MyPair argument") {
+        val arg: Argument<MyPair<String, Boolean>> = object: GenericArgument<MyPair<String, Boolean>>() {}
+    }
+
+    should("use GenericArgument properly for retrieve().awaitSingle() MyPair") {
+        val arg = object: GenericArgument<MyPair<String, Boolean>>() {}
+        val result: MyPair<String, Boolean> = httpClient.retrieve(HttpRequest.GET<Any>("/httptest/somepair"), arg).awaitSingle()
+
+        result.first shouldBe "a"
+        result.second shouldBe true
+    }
+
+    should("make a MyVariancePair argument") {
+        val arg: Argument<MyVariancePair<String, Boolean>> = object: GenericArgument<MyVariancePair<String, Boolean>>() {}
+    }
+
+    should("use GenericArgument properly for retrieve().awaitSingle() MyVariancePair") {
+        val arg = object: GenericArgument<MyVariancePair<String, Boolean>>() {}
+        val result: MyVariancePair<String, Boolean> = httpClient.retrieve(HttpRequest.GET<Any>("/httptest/somepair"), arg).awaitSingle()
 
         result.first shouldBe "a"
         result.second shouldBe true
@@ -50,10 +74,23 @@ class GenericArgumentIssueTest(
         @Get("/someint")
         fun someInt(): Int = 1
 
-        @Get("/someset")
-        fun someSet(): Set<Int> = setOf(1, 2, 3)
-
         @Get("/somepair")
         fun somePair(): Pair<String, Boolean> = Pair("a", true)
+
+        @Get("/somecustompair")
+        fun someCustomPair(): MyPair<String, Boolean> = MyPair("a", true)
+
+        @Get("/somevariancepair")
+        fun someVariancePair(): MyVariancePair<String, Boolean> = MyVariancePair("a", true)
     }
 }
+
+data class MyPair<L, R>(
+    val first: L,
+    val second: R,
+)
+
+data class MyVariancePair<out L, out R>(
+    val first: L,
+    val second: R,
+)
